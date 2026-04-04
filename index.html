@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Demand Lab — Validate Before You Launch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:#fff;overflow-x:hidden;}
+
+/* PAGE SYSTEM — only .active is shown, overrides everything */
+.page{display:none!important;}
+.page.active{display:block!important;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimBar{0%{left:-60%}100%{left:120%}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes cardIn{0%{opacity:0;transform:translateY(16px) scale(.96)}12%{opacity:1;transform:none}82%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-12px) scale(.96)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+
+.fade-up{animation:fadeUp .6s ease-out both;}
+.d1{animation-delay:.07s}.d2{animation-delay:.16s}.d3{animation-delay:.26s}.d4{animation-delay:.36s}.d5{animation-delay:.48s}
+.pulse-dot{animation:pulse 2.4s ease-in-out infinite;}
+.card-anim{animation:cardIn 3.4s ease-in-out forwards;}
+.scale-in{animation:scaleIn .25s ease-out both;}
+
+/* Header */
+#header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);border-bottom:1px solid #f1f5f9;}
+.hdr-inner{max-width:1200px;margin:0 auto;padding:0 16px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px;}
+.logo-icon{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#0ea5e9);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,99,235,.3);flex-shrink:0;}
+.logo-icon svg{width:16px;height:16px;}
+.logo-text{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#0f172a;}
+.hdr-nav{display:flex;align-items:center;gap:18px;}
+.navl{color:#64748b;font-weight:500;font-size:.875rem;text-decoration:none;position:relative;}
+.navl::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:2px;background:linear-gradient(90deg,#2563eb,#0ea5e9);border-radius:2px;transition:width .25s;}
+.navl:hover{color:#0f172a}.navl:hover::after{width:100%;}
+.btn-violet{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-weight:600;font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:opacity .18s;}
+.btn-violet:hover{opacity:.9;}
+.btn-blue{background:linear-gradient(135deg,#1d4ed8,#0284c7);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:600;font-size:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;transition:opacity .18s;}
+.btn-blue:hover{opacity:.9;}
+.btn-outline{background:transparent;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 22px;font-weight:600;font-size:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#374151;display:inline-flex;align-items:center;gap:6px;}
+.btn-outline:hover{border-color:#374151;}
+
+/* Hero */
+#hero{min-height:100vh;background:linear-gradient(150deg,#f8fafc 0%,#fff 55%,#eff6ff 100%);padding-top:58px;position:relative;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;pointer-events:none;}
+.hero-grid{max-width:1200px;margin:0 auto;padding:60px 20px 80px;display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;}
+@media(max-width:680px){.hero-grid{grid-template-columns:1fr;gap:36px;padding:36px 16px 56px;}}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:99px;padding:5px 13px;margin-bottom:18px;}
+.hero-badge-dot{width:7px;height:7px;border-radius:50%;background:#2563eb;}
+.hero-badge span{font-size:.76rem;font-weight:600;color:#1d4ed8;}
+.hero-title{font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;color:#0f172a;line-height:1.08;margin-bottom:16px;}
+@media(max-width:480px){.hero-title{font-size:2.4rem;}}
+.grad-text{background:linear-gradient(135deg,#2563eb,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{font-size:.97rem;color:#64748b;line-height:1.7;max-width:400px;margin-bottom:26px;}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+.btn-primary{background:linear-gradient(135deg,#1d4ed8,#0284c7);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-weight:600;font-size:.88rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;}
+.hero-checks{display:flex;flex-direction:column;gap:8px;}
+.hero-check{display:flex;align-items:center;gap:8px;}
+.check-icon{width:20px;height:20px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hero-check span{font-size:.83rem;color:#64748b;font-weight:500;}
+
+/* Flashcards */
+.fc-wrap{position:relative;max-width:360px;width:100%;margin:0 auto;}
+.fc-ghost{position:absolute;border-radius:20px;}
+.flashcard{position:relative;z-index:2;border-radius:20px;padding:24px 24px 20px;min-height:210px;}
+.fc-status{font-size:11px;font-weight:600;background:rgba(255,255,255,.22);color:#fff;padding:3px 9px;border-radius:99px;display:inline-block;}
+.fc-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin:8px 0 13px;}
+.bar-track{height:6px;border-radius:99px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;position:relative;overflow:hidden;}
+.bar-fill::after{content:'';position:absolute;top:0;left:-60%;width:38%;height:100%;background:rgba(255,255,255,.25);animation:shimBar 2.2s ease-in-out infinite;}
+.fc-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:13px;}
+.fc-trend-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border-radius:9px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;}
+.fc-dots{display:flex;justify-content:center;gap:6px;margin-top:13px;}
+.fc-dot{border:none;cursor:pointer;padding:0;border-radius:99px;height:7px;transition:all .25s;}
+.fc-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.fc-stat{background:#fff;border:1.5px solid #f1f5f9;border-radius:12px;padding:10px 6px;text-align:center;}
+.fc-stat-v{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:#0f172a;}
+.fc-stat-l{font-size:10px;color:#94a3b8;margin-top:1px;}
+
+/* Sections */
+.section{padding:72px 16px;}
+.sec-inner{max-width:1200px;margin:0 auto;}
+.sec-tag{font-size:.7rem;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:7px;}
+.sec-title{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:#0f172a;margin-bottom:9px;}
+.sec-sub{font-size:.9rem;color:#64748b;max-width:460px;}
+
+/* Product cards */
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;}
+@media(max-width:720px){.prod-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:440px){.prod-grid{grid-template-columns:1fr;}}
+.prod-card{background:#fff;border:1.5px solid #f1f5f9;border-radius:18px;overflow:hidden;text-align:left;width:100%;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:0;transition:transform .24s,box-shadow .24s;}
+.prod-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px -10px rgba(0,0,0,.14);}
+.prod-card-hdr{height:116px;padding:16px 18px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;}
+.prod-card-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#fff;}
+.prod-card-body{padding:16px 18px;flex-grow:1;display:flex;flex-direction:column;gap:13px;}
+.prod-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:#eff6ff;color:#2563eb;}
+.prod-trend{font-size:10px;font-weight:700;color:#16a34a;}
+.prod-desc{font-size:.8rem;color:#64748b;line-height:1.55;}
+.bar-label-row{display:flex;justify-content:space-between;margin-bottom:5px;}
+.bar-label{font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;}
+.bar-val{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:#0f172a;}
+.light-bar{height:6px;background:#f1f5f9;border-radius:99px;overflow:hidden;}
+.prod-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.prod-stat{background:#f8fafc;border-radius:9px;padding:8px 10px;}
+.prod-stat-l{font-size:10px;color:#94a3b8;margin-bottom:2px;}
+.prod-stat-v{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:#0f172a;}
+.prod-btn{width:100%;color:#fff;border:none;border-radius:9px;padding:9px 0;font-weight:600;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:'DM Sans',sans-serif;margin-top:auto;}
+
+/* Why */
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
+@media(max-width:680px){.why-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:380px){.why-grid{grid-template-columns:1fr;}}
+.why-card{background:#fff;border:1.5px solid #f1f5f9;border-radius:16px;padding:22px 20px;transition:transform .24s,box-shadow .24s;}
+.why-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px -10px rgba(0,0,0,.12);}
+.why-icon{width:44px;height:44px;border-radius:12px;background:#f8fafc;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.why-icon svg{width:24px;height:24px;}
+.why-title{font-family:'Syne',sans-serif;font-size:.97rem;font-weight:700;color:#0f172a;margin-bottom:6px;}
+.why-desc{font-size:.82rem;color:#64748b;line-height:1.6;}
+
+/* Footer */
+footer{background:#0a0f1e;border-top:1.5px solid #1e293b;padding:48px 16px 28px;}
+.foot-inner{max-width:1200px;margin:0 auto;}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:28px;margin-bottom:40px;}
+@media(max-width:640px){.foot-grid{grid-template-columns:1fr 1fr;gap:22px;}}
+.foot-logo{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.foot-logo-icon{width:27px;height:27px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#0ea5e9);display:flex;align-items:center;justify-content:center;}
+.foot-brand{font-family:'Syne',sans-serif;font-weight:700;color:#f8fafc;font-size:.95rem;}
+.foot-tagline{font-size:.82rem;color:#475569;line-height:1.65;max-width:200px;margin-bottom:13px;}
+.foot-h{font-family:'Syne',sans-serif;font-size:.73rem;font-weight:700;color:#64748b;margin-bottom:13px;text-transform:uppercase;letter-spacing:.07em;}
+.foot-ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.foot-ul a{font-size:.82rem;color:#475569;text-decoration:none;}.foot-ul a:hover{color:#94a3b8;}
+.foot-bottom{border-top:1.5px solid #1e293b;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;}
+.foot-copy{font-size:.75rem;color:#334155;}
+.admin-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid #1e293b;border-radius:7px;padding:5px 10px;cursor:pointer;color:#475569;font-size:.7rem;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .18s;}
+.admin-btn:hover{color:#64748b;border-color:#334155;}
+.admin-btn svg{width:10px;height:10px;}
+
+/* Modals */
+.modal-ov{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;max-width:530px;width:100%;max-height:95vh;overflow-y:auto;box-shadow:0 -12px 60px rgba(0,0,0,.18);animation:scaleIn .25s ease-out;}
+.modal-hdr{border-radius:20px 20px 0 0;padding:17px 18px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10;}
+.modal-back{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.18);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-back svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.modal-ttl{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#fff;}
+.modal-sub-txt{font-size:.7rem;color:rgba(255,255,255,.7);}
+.modal-x{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.7);display:flex;padding:4px;margin-left:auto;}
+.modal-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.modal-body{padding:18px 18px 26px;}
+.field{margin-bottom:10px;}
+.field label{font-size:.71rem;font-weight:600;color:#374151;display:block;margin-bottom:4px;}
+.ibase{width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.875rem;outline:none;font-family:'DM Sans',sans-serif;transition:border .18s,box-shadow .18s;background:#fff;}
+.ibase:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.hint-box{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:9px 12px;display:flex;gap:8px;margin-bottom:15px;font-size:.78rem;color:#6d28d9;align-items:flex-start;}
+
+/* Product modal */
+.pm-hdr{height:104px;border-radius:20px 20px 0 0;padding:0 18px;display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:15px;position:sticky;top:0;z-index:10;}
+.pm-back{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pm-x{background:rgba(255,255,255,.2);border:none;cursor:pointer;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.pm-back svg,.pm-x svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.prob-box{border-radius:12px;padding:11px 13px;}
+.prob-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.prob-text{font-size:.82rem;color:#374151;line-height:1.55;}
+.val-box{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:15px 17px;margin-bottom:18px;}
+.val-lbl{font-size:.66rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.val-nums{display:flex;justify-content:space-between;margin-bottom:9px;}
+.val-big{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:#0f172a;}
+.val-sm{font-size:.73rem;color:#64748b;}
+
+/* Success */
+.success-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
+.success-ov.open{display:flex;}
+.success-box{background:#fff;border-radius:20px;padding:42px;max-width:320px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.16);width:100%;animation:scaleIn .25s ease-out;}
+.success-icon{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 15px;}
+.success-icon svg{width:28px;height:28px;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.success-title{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;color:#0f172a;margin-bottom:7px;}
+.success-sub{color:#64748b;font-size:.875rem;}
+
+/* ═══ ADMIN LOGIN PAGE ═══ */
+#page-admin-login{min-height:100vh;background:linear-gradient(150deg,#0a0f1e,#0f172a);align-items:center;justify-content:center;padding:18px;}
+/* override: when active, use flex */
+#page-admin-login.active{display:flex!important;}
+.alog-box{width:100%;max-width:390px;}
+.back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;color:#64748b;margin-bottom:24px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;padding:0;transition:color .2s;}
+.back-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.back-btn:hover{color:#94a3b8;}
+.alog-center{text-align:center;margin-bottom:24px;}
+.alog-icon{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#0ea5e9);display:flex;align-items:center;justify-content:center;margin:0 auto 13px;box-shadow:0 8px 24px rgba(37,99,235,.35);}
+.alog-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.alog-title{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;color:#f8fafc;margin-bottom:4px;}
+.alog-sub{color:#64748b;font-size:.85rem;}
+.alog-card{background:#111827;border:1.5px solid #1e293b;border-radius:18px;padding:22px;box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.dark-lbl{font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:5px;}
+.dark-inp{width:100%;padding:10px 13px;border:1.5px solid #1e293b;border-radius:10px;font-size:.875rem;outline:none;background:#0f172a;color:#e2e8f0;font-family:'DM Sans',sans-serif;margin-bottom:4px;transition:border .18s;}
+.dark-inp:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.14);}
+.pw-err{font-size:.78rem;color:#f87171;display:none;margin-bottom:4px;}
+.pw-err.show{display:block;}
+
+/* ═══ ADMIN DASHBOARD PAGE ═══ */
+#page-admin{min-height:100vh;background:#0a0f1e;color:#f8fafc;flex-direction:column;}
+#page-admin.active{display:flex!important;}
+.adm-hdr{background:#0d1424;border-bottom:1.5px solid #1e293b;padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;flex-shrink:0;}
+.adm-brand{display:flex;align-items:center;gap:8px;}
+.adm-logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#0ea5e9);display:flex;align-items:center;justify-content:center;}
+.adm-logo svg{width:13px;height:13px;}
+.adm-brand-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#f8fafc;}
+.adm-sep{color:#334155;margin:0 2px;}
+.adm-page{font-size:.76rem;color:#475569;}
+.adm-right{display:flex;align-items:center;gap:8px;}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:99px;padding:4px 10px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#10b981;}
+.live-txt{font-size:.68rem;font-weight:600;color:#34d399;font-family:'DM Sans',sans-serif;}
+.logout-btn{display:flex;align-items:center;gap:5px;background:#1e293b;border:1.5px solid #334155;border-radius:8px;padding:6px 12px;cursor:pointer;color:#cbd5e1;font-size:.76rem;font-family:'DM Sans',sans-serif;font-weight:500;transition:background .18s;}
+.logout-btn:hover{background:#293548;}
+.logout-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.adm-body{display:flex;flex:1;min-height:0;}
+.adm-sidebar{width:196px;background:#0d1424;border-right:1.5px solid #1e293b;padding:16px 10px;display:flex;flex-direction:column;gap:2px;position:sticky;top:54px;height:calc(100vh - 54px);flex-shrink:0;overflow-y:auto;}
+@media(max-width:600px){.adm-sidebar{display:none;}}
+.sb-lbl{font-size:.62rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.12em;padding:0 8px;margin-bottom:7px;}
+.anav{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:10px;cursor:pointer;font-size:.875rem;font-weight:500;color:#94a3b8;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;transition:all .17s;position:relative;}
+.anav:hover{background:rgba(255,255,255,.06);color:#e2e8f0;}
+.anav.on{background:rgba(59,130,246,.15);color:#60a5fa;}
+.anav svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.nav-bdg{margin-left:auto;background:#7c3aed;color:#fff;font-size:9px;border-radius:99px;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.sb-tip{margin-top:auto;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.14);border-radius:12px;padding:12px;}
+.tip-ttl{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:#60a5fa;margin-bottom:4px;}
+.tip-txt{font-size:.67rem;color:#475569;line-height:1.55;}
+.adm-main{flex:1;padding:24px;overflow-y:auto;}
+@media(max-width:600px){.adm-main{padding:16px 14px 72px;}}
+.tab-c{display:none;flex-direction:column;gap:16px;}
+.tab-c.on{display:flex;animation:fadeUp .2s ease-out both;}
+.dash-title{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;color:#f8fafc;margin-bottom:2px;}
+.dash-sub{font-size:.73rem;color:#475569;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
+@media(max-width:600px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:#111827;border:1.5px solid #1e293b;border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:11px;}
+.stat-top{display:flex;justify-content:space-between;align-items:center;}
+.stat-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.stat-icon svg{width:16px;height:16px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.stat-trend{font-size:.7rem;font-weight:700;font-family:'DM Sans',sans-serif;}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#f8fafc;}
+.stat-lbl{font-size:.71rem;color:#64748b;margin-top:2px;font-family:'DM Sans',sans-serif;}
+.chart-card{background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:18px;}
+.chart-ttl{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:#f8fafc;margin-bottom:14px;}
+.grid-2{display:grid;grid-template-columns:3fr 2fr;gap:13px;}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr;}}
+.rank-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.rank-emoji{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.mini-bar{height:4px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:4px;}
+.mini-fill{height:100%;border-radius:99px;}
+.prod-perf-card{background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:17px 18px;margin-bottom:13px;}
+.ppm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:10px;}
+@media(max-width:480px){.ppm-stats{grid-template-columns:repeat(2,1fr);}}
+.ppm-box{background:#0f172a;border-radius:9px;padding:9px 11px;}
+.ppm-lbl{font-size:.65rem;color:#475569;margin-bottom:2px;font-family:'DM Sans',sans-serif;}
+.ppm-val{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
+.filter-row{display:flex;flex-wrap:wrap;gap:5px;}
+.fbtn{font-size:.68rem;font-weight:600;padding:4px 9px;border-radius:7px;cursor:pointer;border:1.5px solid #1e293b;background:#1e293b;color:#64748b;font-family:'DM Sans',sans-serif;transition:all .17s;}
+.fbtn.on{border:none;background:#2563eb;color:#fff;}
+.ideas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;}
+@media(max-width:500px){.ideas-grid{grid-template-columns:1fr;}}
+.idea-card{background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:9px;}
+.idea-sec{background:#0f172a;border-radius:9px;padding:8px 10px;}
+.idea-sec-lbl{font-size:.64rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;font-family:'DM Sans',sans-serif;}
+.idea-sec-txt{font-size:.78rem;color:#94a3b8;line-height:1.5;font-family:'DM Sans',sans-serif;}
+.validate-btn{display:flex;align-items:center;gap:4px;background:rgba(16,185,129,.1);border:1.5px solid rgba(16,185,129,.2);color:#34d399;border-radius:7px;padding:4px 9px;font-size:.68rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.validate-btn svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.t-table{background:#111827;border:1.5px solid #1e293b;border-radius:16px;overflow:hidden;}
+.t-hdr{padding:14px 18px;border-bottom:1.5px solid #1e293b;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:#f8fafc;}
+.t-row{display:flex;align-items:center;padding:11px 18px;border-bottom:1px solid #0f172a;}
+.t-date{font-size:.75rem;color:#475569;width:58px;flex-shrink:0;font-family:'DM Sans',sans-serif;}
+.t-cols{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.t-col-lbl{font-size:.64rem;color:#334155;margin-bottom:1px;font-family:'DM Sans',sans-serif;}
+.t-col-val{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;}
+.mob-tabs{display:none;position:fixed;bottom:0;left:0;right:0;background:#0d1424;border-top:1.5px solid #1e293b;z-index:30;height:52px;}
+@media(max-width:600px){.mob-tabs{display:flex;}}
+.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:#475569;font-size:.58rem;font-family:'DM Sans',sans-serif;font-weight:600;transition:color .17s;position:relative;}
+.mob-tab.on{color:#60a5fa;}
+.mob-tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.mob-bdg{position:absolute;top:5px;right:calc(50% - 14px);background:#7c3aed;color:#fff;font-size:8px;border-radius:99px;width:13px;height:13px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+/* Real-time indicator */
+.realtime-notice{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.rt-dot{width:8px;height:8px;border-radius:50%;background:#10b981;flex-shrink:0;}
+.rt-txt{font-size:.75rem;color:#34d399;font-family:'DM Sans',sans-serif;}
+
+/* ── Manage Products ── */
+.mg-prod-card{background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;margin-bottom:13px;}
+.mg-prod-top{display:flex;align-items:center;gap:12px;}
+.mg-prod-emoji{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.mg-prod-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#f8fafc;margin-bottom:3px;}
+.mg-prod-desc{font-size:.78rem;color:#64748b;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mg-actions{display:flex;gap:8px;flex-shrink:0;margin-left:auto;}
+.btn-edit{display:inline-flex;align-items:center;gap:5px;background:rgba(37,99,235,.12);border:1.5px solid rgba(37,99,235,.2);color:#60a5fa;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-edit:hover{background:rgba(37,99,235,.22);}
+.btn-edit svg,.btn-del svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.btn-del{display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.2);color:#f87171;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-del:hover{background:rgba(239,68,68,.2);}
+.mg-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mg-detail-box{background:#0f172a;border-radius:10px;padding:10px 12px;}
+.mg-detail-lbl{font-size:.63rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;font-family:'DM Sans',sans-serif;}
+.mg-detail-val{font-size:.8rem;color:#94a3b8;line-height:1.5;font-family:'DM Sans',sans-serif;}
+.btn-add-prod{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-size:.875rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .18s;margin-bottom:16px;}
+.btn-add-prod:hover{opacity:.9;}
+.btn-add-prod svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* Product form modal (dark) */
+.pf-ov{position:fixed;inset:0;background:rgba(10,15,30,.8);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
+.pf-ov.open{display:flex;}
+.pf-box{background:#111827;border:1.5px solid #1e293b;border-radius:20px;max-width:540px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:scaleIn .22s ease-out;}
+.pf-hdr{background:#0d1424;border-bottom:1.5px solid #1e293b;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-radius:20px 20px 0 0;position:sticky;top:0;z-index:10;}
+.pf-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#f8fafc;}
+.pf-close{background:none;border:none;cursor:pointer;color:#64748b;display:flex;padding:4px;}
+.pf-close svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.pf-body{padding:20px;}
+.df{margin-bottom:13px;}
+.df label{font-size:.68rem;font-weight:700;color:#64748b;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.07em;}
+.di{width:100%;padding:9px 12px;border:1.5px solid #1e293b;border-radius:10px;font-size:.875rem;outline:none;background:#0f172a;color:#e2e8f0;font-family:'DM Sans',sans-serif;transition:border .18s;}
+.di:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+.di::placeholder{color:#334155;}
+.di-ta{resize:none;height:68px;}
+.df-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px;}
+.gradient-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.gp{width:36px;height:22px;border-radius:7px;border:2px solid transparent;cursor:pointer;transition:border .18s;}
+.gp.sel{border-color:#fff;}
+.pf-save{width:100%;background:linear-gradient(135deg,#1d4ed8,#0284c7);color:#fff;border:none;border-radius:10px;padding:12px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;transition:opacity .18s;}
+.pf-save:hover{opacity:.9;}
+
+/* Confirm delete */
+.cdel-ov{position:fixed;inset:0;background:rgba(10,15,30,.85);z-index:700;display:none;align-items:center;justify-content:center;padding:16px;}
+.cdel-ov.open{display:flex;}
+.cdel-box{background:#111827;border:1.5px solid #ef444440;border-radius:18px;max-width:340px;width:100%;padding:28px;text-align:center;animation:scaleIn .2s ease-out;}
+.cdel-icon{width:52px;height:52px;border-radius:50%;background:rgba(239,68,68,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.cdel-icon svg{width:24px;height:24px;stroke:#f87171;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.cdel-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:#f8fafc;margin-bottom:6px;}
+.cdel-sub{font-size:.82rem;color:#64748b;font-family:'DM Sans',sans-serif;margin-bottom:20px;}
+.cdel-btns{display:flex;gap:10px;}
+.btn-cancel{flex:1;background:#1e293b;border:1.5px solid #334155;color:#94a3b8;border-radius:10px;padding:10px 0;font-size:.875rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-cancel:hover{background:#293548;}
+.btn-confirm-del{flex:1;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;border:none;border-radius:10px;padding:10px 0;font-size:.875rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+
+<!-- ═══════ HOME PAGE ═══════ -->
+<div id="page-home" class="page active">
+  <header id="header">
+    <div class="hdr-inner">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <span class="logo-text">Demand Lab</span>
+      </div>
+      <nav class="hdr-nav">
+        <a href="#products-section" class="navl">Products</a>
+        <a href="#why-section" class="navl">Why Us</a>
+        <button class="btn-violet" onclick="openIdeaModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg>
+          Suggest Idea
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section id="hero">
+    <div class="blob" style="top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,.07),transparent 70%);"></div>
+    <div class="blob" style="bottom:-60px;left:-60px;width:340px;height:340px;background:radial-gradient(circle,rgba(6,182,212,.06),transparent 70%);"></div>
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge fade-up d1"><div class="hero-badge-dot pulse-dot"></div><span>Validate Before You Build</span></div>
+        <h1 class="hero-title fade-up d2">Know Your<br><span class="grad-text">Market</span> First</h1>
+        <p class="hero-sub fade-up d3">Test product demand with real users. Collect price signals. Build a warm waitlist — then launch with confidence.</p>
+        <div class="hero-btns fade-up d4">
+          <button class="btn-primary" onclick="document.getElementById('products-section').scrollIntoView({behavior:'smooth'})">
+            Explore Products
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <button class="btn-violet" onclick="openIdeaModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg>
+            Suggest an Idea
+          </button>
+        </div>
+        <div class="hero-checks fade-up d5">
+          <div class="hero-check"><div class="check-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><span>3,000+ founders already validating</span></div>
+          <div class="hero-check"><div class="check-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><span>Average validation: 14 days</span></div>
+          <div class="hero-check"><div class="check-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><span>48% avg waitlist-to-sale conversion</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="fc-wrap">
+          <div class="fc-ghost" id="fc-g1" style="top:12px;left:14px;right:14px;height:210px;background:#e2e8f0;z-index:0;"></div>
+          <div class="fc-ghost" id="fc-g2" style="top:6px;left:7px;right:7px;height:210px;background:#cbd5e1;z-index:1;"></div>
+          <div id="flashcard" class="flashcard card-anim" style="position:relative;z-index:2;"></div>
+          <div class="fc-dots" id="fc-dots"></div>
+          <div class="fc-stat-row" id="fc-stats"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="products-section" style="border-top:1.5px solid #f1f5f9;">
+    <div class="sec-inner">
+      <span class="sec-tag">Featured Products</span>
+      <h2 class="sec-title">Products In Validation</h2>
+      <p class="sec-sub">Real founders. Real demand signals. See what's being validated right now.</p>
+      <div class="prod-grid" id="prod-grid"></div>
+    </div>
+  </section>
+
+  <section class="section why-section" id="why-section" style="background:#f8fafc;border-top:1.5px solid #f1f5f9;">
+    <div class="sec-inner">
+      <span class="sec-tag">Why Demand Lab</span>
+      <h2 class="sec-title">Built for Founders</h2>
+      <p class="sec-sub">Everything you need to validate, iterate, and launch confidently.</p>
+      <div class="why-grid">
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div><div class="why-title">Real Demand Data</div><p class="why-desc">Validate market interest before committing to production costs.</p></div>
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="why-title">Warm Audience</div><p class="why-desc">Convert validated interest into day-1 sales at launch.</p></div>
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="why-title">Price Optimisation</div><p class="why-desc">Discover what users actually pay using real preference data.</p></div>
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div class="why-title">Global Reach</div><p class="why-desc">Test across markets simultaneously, no extra overhead.</p></div>
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="why-title">Fast Validation</div><p class="why-desc">Go from idea to validated signal in as little as 14 days.</p></div>
+        <div class="why-card"><div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/></svg></div><div class="why-title">Launch Ready</div><p class="why-desc">Step into launch day with a warm, eager audience already in place.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-grid">
+        <div>
+          <div class="foot-logo"><div class="foot-logo-icon"><svg viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><span class="foot-brand">Demand Lab</span></div>
+          <p class="foot-tagline">Test demand, build waitlists, launch with confidence.</p>
+          <button class="btn-violet" style="font-size:.76rem;padding:7px 13px;" onclick="openIdeaModal()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg>
+            Suggest an Idea
+          </button>
+        </div>
+        <div><h4 class="foot-h">Product</h4><ul class="foot-ul"><li><a href="#">Features</a></li><li><a href="#">Pricing</a></li><li><a href="#">API</a></li><li><a href="#">Docs</a></li></ul></div>
+        <div><h4 class="foot-h">Company</h4><ul class="foot-ul"><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Contact</a></li></ul></div>
+        <div><h4 class="foot-h">Legal</h4><ul class="foot-ul"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul></div>
+      </div>
+      <div class="foot-bottom">
+        <span class="foot-copy">© 2026 Demand Lab. All rights reserved.</span>
+        <button class="admin-btn" onclick="showAdminLogin()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Admin
+        </button>
+      </div>
+    </div>
+  </footer>
+</div><!-- end page-home -->
+
+<!-- ═══════ ADMIN LOGIN ═══════ -->
+<div id="page-admin-login" class="page">
+  <div class="alog-box">
+    <button class="back-btn" onclick="showHome()">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to site
+    </button>
+    <div class="alog-center">
+      <div class="alog-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <h1 class="alog-title">Admin Access</h1>
+      <p class="alog-sub">Demand Lab Analytics Dashboard</p>
+    </div>
+    <div class="alog-card">
+      <label class="dark-lbl">Password</label>
+      <input class="dark-inp" type="password" id="pw-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <p class="pw-err" id="pw-err">Incorrect password. Try again.</p>
+      <div style="margin-top:14px"><button class="btn-blue" onclick="doLogin()">Enter Dashboard</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ADMIN DASHBOARD ═══════ -->
+<div id="page-admin" class="page">
+  <header class="adm-hdr">
+    <div class="adm-brand">
+      <div class="adm-logo"><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <span class="adm-brand-name">Demand Lab</span>
+      <span class="adm-sep">/</span>
+      <span class="adm-page">Admin</span>
+    </div>
+    <div class="adm-right">
+      <div class="live-pill"><div class="live-dot pulse-dot"></div><span class="live-txt">Live</span></div>
+      <button class="logout-btn" onclick="showHome()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Logout
+      </button>
+    </div>
+  </header>
+  <div class="adm-body">
+    <aside class="adm-sidebar">
+      <p class="sb-lbl">Navigation</p>
+      <button class="anav on" data-tab="overview" onclick="switchTab('overview')"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Overview</button>
+      <button class="anav" data-tab="products" onclick="switchTab('products')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg> Products</button>
+      <button class="anav" data-tab="ideas" onclick="switchTab('ideas')"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg> Ideas <span class="nav-bdg" id="ideas-badge" style="display:none"></span></button>
+      <button class="anav" data-tab="traffic" onclick="switchTab('traffic')"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> Traffic</button>
+      <button class="anav" data-tab="manage" onclick="switchTab('manage')"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Manage</button>
+      <div class="sb-tip"><div class="tip-ttl">Pro Insight</div><p class="tip-txt">Products at 70%+ demand should move to production immediately.</p></div>
+    </aside>
+    <main class="adm-main">
+
+      <!-- OVERVIEW TAB -->
+      <div class="tab-c on" id="tab-overview">
+        <div>
+          <p class="dash-title">Dashboard Overview</p>
+          <p class="dash-sub" id="adm-last-updated">Tracking real visitors from first load</p>
+        </div>
+        <div class="realtime-notice">
+          <div class="rt-dot pulse-dot"></div>
+          <span class="rt-txt">Real-time data — tracking actual visitors and signups from your deployment</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(59,130,246,.18)"><svg viewBox="0 0 24 24" stroke="#3b82f6" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><span class="stat-trend" style="color:#34d399">live</span></div><div><div class="stat-val" id="stat-visitors">0</div><div class="stat-lbl">Total Visitors</div></div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(6,182,212,.18)"><svg viewBox="0 0 24 24" stroke="#06b6d4" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="stat-trend" style="color:#34d399">live</span></div><div><div class="stat-val" id="stat-signups">0</div><div class="stat-lbl">Waitlist Signups</div></div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(16,185,129,.18)"><svg viewBox="0 0 24 24" stroke="#10b981" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><span class="stat-trend" style="color:#34d399">live</span></div><div><div class="stat-val" id="stat-conv">0%</div><div class="stat-lbl">Conversion Rate</div></div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(167,139,250,.18)"><svg viewBox="0 0 24 24" stroke="#a78bfa" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg></div><span class="stat-trend" style="color:#34d399">live</span></div><div><div class="stat-val" id="stat-ideas-count">0</div><div class="stat-lbl">Ideas Submitted</div></div></div>
+        </div>
+        <div class="chart-card"><div class="chart-ttl">Visitors Over Time</div><div><canvas id="chart-visitors" height="180"></canvas></div></div>
+        <div class="grid-2">
+          <div class="chart-card">
+            <div class="chart-ttl">Product Demand</div>
+            <div id="rank-list"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-ttl">Signups Per Product</div>
+            <div id="pipeline-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS TAB -->
+      <div class="tab-c" id="tab-products">
+        <div><p class="dash-title">Product Performance</p><p class="dash-sub">Real signups tracked from your deployment</p></div>
+        <div class="realtime-notice"><div class="rt-dot pulse-dot"></div><span class="rt-txt">Signup counts are real — updated each time someone joins a waitlist</span></div>
+        <div id="prod-perf-list"></div>
+      </div>
+
+      <!-- IDEAS TAB -->
+      <div class="tab-c" id="tab-ideas">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:9px;">
+          <div><p class="dash-title">Submitted Ideas</p><p class="dash-sub" id="ideas-count-text">0 ideas from the community</p></div>
+          <div class="filter-row" id="cat-filters"></div>
+        </div>
+        <div id="ideas-list"></div>
+      </div>
+
+      <!-- TRAFFIC TAB -->
+      <div class="tab-c" id="tab-traffic">
+        <div><p class="dash-title">Traffic Analytics</p><p class="dash-sub">Session log — each row is a visit</p></div>
+        <div class="realtime-notice"><div class="rt-dot pulse-dot"></div><span class="rt-txt">Visitor sessions tracked in real-time via this device's storage</span></div>
+        <div class="chart-card"><div class="chart-ttl">Visitor Sessions</div><div><canvas id="chart-sessions" height="200"></canvas></div></div>
+        <div class="t-table">
+          <div class="t-hdr">Session Log</div>
+          <div id="session-log"></div>
+        </div>
+      </div>
+
+      <!-- MANAGE TAB -->
+      <div class="tab-c" id="tab-manage">
+        <div><p class="dash-title">Manage Products</p><p class="dash-sub">Add, edit, or remove products. Changes show live on the public site instantly.</p></div>
+        <button class="btn-add-prod" onclick="openProductForm(null)">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Product
+        </button>
+        <div id="manage-prod-list"></div>
+      </div>
+
+    </main>
+  </div>
+  <div class="mob-tabs">
+    <button class="mob-tab on" data-tab="overview" onclick="switchTab('overview')"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Overview</button>
+    <button class="mob-tab" data-tab="products" onclick="switchTab('products')"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Products</button>
+    <button class="mob-tab" data-tab="ideas" onclick="switchTab('ideas')"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg>Ideas<span class="mob-bdg" id="mob-bdg" style="display:none"></span></button>
+    <button class="mob-tab" data-tab="traffic" onclick="switchTab('traffic')"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Traffic</button>
+    <button class="mob-tab" data-tab="manage" onclick="switchTab('manage')"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Manage</button>
+  </div>
+</div>
+
+<!-- ═══════ PRODUCT MODAL ═══════ -->
+<div class="modal-ov" id="modal-product">
+  <div class="modal-box" id="prod-modal-box"></div>
+</div>
+
+<!-- ═══════ IDEA MODAL ═══════ -->
+<div class="modal-ov" id="modal-idea">
+  <div class="modal-box">
+    <div class="modal-hdr" style="background:linear-gradient(135deg,#7c3aed,#2563eb);">
+      <button class="modal-back" onclick="closeIdeaModal()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+      <div><div class="modal-ttl">Suggest a Product Idea</div><div class="modal-sub-txt">Help us discover what people actually want</div></div>
+      <button class="modal-x" onclick="closeIdeaModal()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="hint-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Best ideas get validated with real users. High-demand ideas move to production!
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Your Name</label><input class="ibase" id="idea-name" placeholder="Jane Smith"/></div>
+        <div class="field"><label>Email *</label><input class="ibase" id="idea-email" type="email" placeholder="you@example.com"/></div>
+      </div>
+      <div class="field"><label>Idea Title *</label><input class="ibase" id="idea-title" placeholder="e.g. AI meal planner for athletes"/></div>
+      <div class="field-row">
+        <div class="field"><label>Category</label><select class="ibase" id="idea-cat"><option>Health Tech</option><option>Productivity</option><option>Sustainability</option><option>Finance</option><option>Other</option></select></div>
+        <div class="field"><label>Your Solution</label><input class="ibase" id="idea-solution" placeholder="How would it work?"/></div>
+      </div>
+      <div class="field"><label>The Problem *</label><textarea class="ibase" id="idea-problem" style="height:68px;resize:none" placeholder="What problem does this solve? Who faces it?"></textarea></div>
+      <button class="btn-blue" onclick="submitIdea()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:5px"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+        Submit My Idea
+      </button>
+      <p style="font-size:.69rem;color:#94a3b8;text-align:center;margin-top:7px;">Ideas reviewed in 48 hrs. Top ideas get featured!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SUCCESS OVERLAYS ═══════ -->
+<div class="success-ov" id="suc-product">
+  <div class="success-box">
+    <div class="success-icon" style="background:#dcfce7"><svg fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <div class="success-title">You're In!</div>
+    <p class="success-sub" id="suc-product-txt"></p>
+  </div>
+</div>
+<div class="success-ov" id="suc-idea">
+  <div class="success-box">
+    <div class="success-icon" style="background:#ede9fe"><svg fill="none" stroke="#7c3aed" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/></svg></div>
+    <div class="success-title">Idea Submitted!</div>
+    <p class="success-sub">Our team reviews it within 48 hrs. Top ideas get validated!</p>
+  </div>
+</div>
+
+<!-- ═══════ PRODUCT FORM MODAL ═══════ -->
+<div class="pf-ov" id="pf-modal">
+  <div class="pf-box">
+    <div class="pf-hdr">
+      <span class="pf-title" id="pf-modal-title">Add New Product</span>
+      <button class="pf-close" onclick="closeProductForm()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="pf-body">
+      <div class="df-row">
+        <div class="df"><label>Product Name *</label><input class="di" id="pf-name" placeholder="e.g. Smart Sleep Ring"/></div>
+        <div class="df"><label>Emoji</label><input class="di" id="pf-emoji" placeholder="💍" style="font-size:1.2rem"/></div>
+      </div>
+      <div class="df"><label>Short Description *</label><input class="di" id="pf-desc" placeholder="One-line description of the product"/></div>
+      <div class="df"><label>The Problem *</label><textarea class="di di-ta" id="pf-problem" placeholder="What problem does this solve? Who faces it?"></textarea></div>
+      <div class="df"><label>Our Solution *</label><textarea class="di di-ta" id="pf-solution" placeholder="How does your product solve it?"></textarea></div>
+      <div class="df-row">
+        <div class="df"><label>Status</label>
+          <select class="di" id="pf-status">
+            <option>Validation In Progress</option>
+            <option>Pre-Launch</option>
+            <option>High Demand Verified</option>
+            <option>Coming Soon</option>
+          </select>
+        </div>
+        <div class="df"><label>Demand Score %</label><input class="di" id="pf-demand" type="number" min="1" max="100" placeholder="68"/></div>
+      </div>
+      <div class="df-row">
+        <div class="df"><label>Trend Label</label><input class="di" id="pf-trend" placeholder="+12%"/></div>
+        <div class="df"><label>Category</label>
+          <select class="di" id="pf-category">
+            <option>Health Tech</option><option>Productivity</option><option>Sustainability</option><option>Finance</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="df">
+        <label>Card Colour Theme</label>
+        <div class="gradient-presets" id="gradient-presets"></div>
+      </div>
+      <button class="pf-save" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ CONFIRM DELETE MODAL ═══════ -->
+<div class="cdel-ov" id="cdel-modal">
+  <div class="cdel-box">
+    <div class="cdel-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg></div>
+    <div class="cdel-title">Remove Product?</div>
+    <p class="cdel-sub" id="cdel-msg">This will remove the product from the public site permanently.</p>
+    <div class="cdel-btns">
+      <button class="btn-cancel" onclick="closeDel()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DEFAULT PRODUCTS (used only if none saved in localStorage)
+══════════════════════════════════════════════════════ */
+const DEFAULT_PRODUCTS = [
+  { id:1, name:'Smart Sleep Ring',    emoji:'💍', desc:'Ultra-minimalist ring with real-time sleep analytics',     problem:'Sleep insights scattered across apps.',        solution:'Ultra-minimalist ring. Sleep analytics. One app.',    status:'Validation In Progress', demand:68, g:['#3b82f6','#06b6d4'], trend:'+12%', category:'Health Tech' },
+  { id:2, name:'Modular Desk System', emoji:'🖥️', desc:'Cable-free, tool-free workspace organisation',             problem:'WFH setups are messy. Cables everywhere.',     solution:'Magnetic clips. Adjustable surface. No tools.',       status:'Pre-Launch',             demand:52, g:['#8b5cf6','#ec4899'], trend:'+8%',  category:'Productivity' },
+  { id:3, name:'Focused Browser',     emoji:'🧠', desc:'Smart friction engine for digital wellbeing',              problem:'You lose 2 hours daily to infinite scroll.',   solution:'Smart friction. Distraction sites load slowly.',      status:'High Demand Verified',   demand:85, g:['#f97316','#ef4444'], trend:'+24%', category:'Productivity' },
+];
+
+// Live products array — loaded from / saved to localStorage
+let PRODUCTS = [];
+function loadProducts() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('dl_products'));
+    PRODUCTS = (saved && saved.length) ? saved : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  } catch(e) { PRODUCTS = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS)); }
+}
+function saveProducts() {
+  try { localStorage.setItem('dl_products', JSON.stringify(PRODUCTS)); } catch(e) {}
+}
+
+// Gradient presets
+const GRADIENTS = [
+  ['#3b82f6','#06b6d4'], ['#8b5cf6','#ec4899'], ['#f97316','#ef4444'],
+  ['#10b981','#0ea5e9'], ['#f59e0b','#ef4444'], ['#6366f1','#8b5cf6'],
+  ['#ec4899','#f97316'], ['#0ea5e9','#10b981'], ['#7c3aed','#2563eb'],
+];
+const PRICES  = ['₹299','₹499','₹999','₹1499','₹2499','₹3999','₹5999'];
+const CATS    = ['All','Health Tech','Productivity','Sustainability','Finance','Other'];
+const CAT_CLR = { 'Health Tech':'#3b82f6','Productivity':'#8b5cf6','Sustainability':'#10b981','Finance':'#f59e0b','Other':'#6b7280' };
+
+/* ═══════════════════════════════════════════════════════
+   REAL-TIME TRACKING via localStorage
+   All numbers start at 0 and only grow with real actions
+══════════════════════════════════════════════════════ */
+function loadState() {
+  try { return JSON.parse(localStorage.getItem('dl_state') || '{}'); } catch(e) { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem('dl_state', JSON.stringify(s)); } catch(e) {}
+}
+function getState() {
+  const s = loadState();
+  if (!s.visitors)   s.visitors = 0;
+  if (!s.signups)    s.signups  = { total:0, byProduct:{1:0,2:0,3:0} };
+  if (!s.ideas)      s.ideas    = [];
+  if (!s.sessions)   s.sessions = [];  // [{time, page}]
+  return s;
+}
+
+// Count this page visit
+(function trackVisit() {
+  const s = getState();
+  s.visitors += 1;
+  const now = new Date();
+  s.sessions.push({
+    time: now.toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),
+    ts: now.getTime()
+  });
+  // Keep last 50 sessions
+  if (s.sessions.length > 50) s.sessions = s.sessions.slice(-50);
+  saveState(s);
+})();
+
+/* ═══════════════════════════════════════════════════════
+   HERO FLASHCARD — show fake inflated numbers
+   Fake offset: random 500–1500 per product, seeded so
+   it's consistent within a session
+══════════════════════════════════════════════════════ */
+// Generate stable fake offsets (same per session)
+const FAKE_OFFSETS = PRODUCTS.map((p, i) => {
+  const seed = p.id * 373;
+  return 500 + (seed % 1001); // 500–1500
+});
+// Fake hero waitlist = visits + fake offset
+function heroWaitlist(productIdx) {
+  const s = getState();
+  const base = s.signups.byProduct[PRODUCTS[productIdx].id] || 0;
+  return base + FAKE_OFFSETS[productIdx];
+}
+
+let fcIdx = 0, fcTimer;
+function renderFlashcard() {
+  const p  = PRODUCTS[fcIdx];
+  const fc = document.getElementById('flashcard');
+  fc.style.background = `linear-gradient(135deg,${p.g[0]},${p.g[1]})`;
+  fc.style.boxShadow  = `0 18px 50px -8px ${p.g[0]}55`;
+  fc.className = 'flashcard card-anim';
+  void fc.offsetWidth;
+  const fakeWait = heroWaitlist(fcIdx);
+  fc.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;">
+      <div>
+        <span class="fc-status">${p.status}</span>
+        <div class="fc-name">${p.name}</div>
+      </div>
+      <span style="font-size:28px">${p.emoji}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:11px;color:rgba(255,255,255,.8);">
+      <span>Market Demand</span>
+      <span style="font-family:Syne,sans-serif;font-weight:700;color:#fff">${p.demand}%</span>
+    </div>
+    <div class="bar-track" style="background:rgba(255,255,255,.28);margin-bottom:13px;">
+      <div class="bar-fill" style="width:${p.demand}%;background:rgba(255,255,255,.85);"></div>
+    </div>
+    <div class="fc-bottom">
+      <div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:1px;">Waitlist</div>
+        <div style="font-family:Syne,sans-serif;font-size:1.35rem;font-weight:800;color:#fff">${fakeWait.toLocaleString()}</div>
+      </div>
+      <div class="fc-trend-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18M17 6h6v6"/></svg>
+        ${p.trend}
+      </div>
+    </div>`;
+
+  // Dots
+  const dots = document.getElementById('fc-dots');
+  dots.innerHTML = PRODUCTS.map((_,i) =>
+    `<button class="fc-dot" onclick="goFC(${i})" style="width:${i===fcIdx?20:7}px;background:${i===fcIdx?'#2563eb':'#cbd5e1'}"></button>`
+  ).join('');
+
+  // Stats row — also fake
+  const totalFake = PRODUCTS.reduce((a,_,i)=>a+heroWaitlist(i),0);
+  document.getElementById('fc-stats').innerHTML = `
+    <div class="fc-stat"><div class="fc-stat-v">${totalFake.toLocaleString()}</div><div class="fc-stat-l">On Waitlists</div></div>
+    <div class="fc-stat"><div class="fc-stat-v">48%</div><div class="fc-stat-l">Avg Conv.</div></div>
+    <div class="fc-stat"><div class="fc-stat-v">14d</div><div class="fc-stat-l">Avg Time</div></div>`;
+}
+function goFC(n) { clearInterval(fcTimer); fcIdx=n; renderFlashcard(); fcTimer=setInterval(()=>{fcIdx=(fcIdx+1)%PRODUCTS.length;renderFlashcard();},3400); }
+function startFC() { renderFlashcard(); clearInterval(fcTimer); fcTimer=setInterval(()=>{fcIdx=(fcIdx+1)%PRODUCTS.length;renderFlashcard();},3400); }
+
+/* ═══════════════════════════════════════════════════════
+   PRODUCT CARDS — show real signup count from state
+══════════════════════════════════════════════════════ */
+function renderProductCards() {
+  const s = getState();
+  document.getElementById('prod-grid').innerHTML = PRODUCTS.map(p => {
+    const realSignups = s.signups.byProduct[p.id] || 0;
+    return `
+    <button class="prod-card" onclick="openProductModal(${p.id})">
+      <div class="prod-card-hdr" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">
+        <span class="prod-card-name">${p.name}</span>
+        <span style="font-size:24px">${p.emoji}</span>
+      </div>
+      <div class="prod-card-body">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="prod-badge">${p.status}</span>
+          <span class="prod-trend">${p.trend}</span>
+        </div>
+        <p class="prod-desc">${p.desc}</p>
+        <div>
+          <div class="bar-label-row"><span class="bar-label">Market Demand</span><span class="bar-val">${p.demand}%</span></div>
+          <div class="light-bar"><div class="bar-fill" style="width:${p.demand}%;background:linear-gradient(90deg,${p.g[0]},${p.g[1]})"></div></div>
+        </div>
+        <div class="prod-stats">
+          <div class="prod-stat"><div class="prod-stat-l">Early Signups</div><div class="prod-stat-v">${realSignups}</div></div>
+          <div class="prod-stat"><div class="prod-stat-l">Demand</div><div class="prod-stat-v">${p.demand}%</div></div>
+        </div>
+        <button class="prod-btn" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">
+          View Details
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAGE ROUTING
+══════════════════════════════════════════════════════ */
+function setPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showHome()       { setPage('page-home'); }
+function showAdminLogin() { setPage('page-admin-login'); }
+function showAdmin()      { setPage('page-admin'); renderAdminContent(); }
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN AUTH
+══════════════════════════════════════════════════════ */
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  const err = document.getElementById('pw-err');
+  if (pw === 'yuvrajsahu3691') {
+    err.classList.remove('show');
+    document.getElementById('pw-input').value = '';
+    showAdmin();
+  } else {
+    err.classList.add('show');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRODUCT MODAL
+══════════════════════════════════════════════════════ */
+function openProductModal(id) {
+  const p = PRODUCTS.find(x=>x.id===id);
+  const s = getState();
+  const realSignups = s.signups.byProduct[p.id] || 0;
+  document.getElementById('prod-modal-box').innerHTML = `
+    <div class="pm-hdr" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="pm-back" onclick="closeProductModal()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        <span style="font-family:Syne,sans-serif;font-size:1.15rem;font-weight:700;color:#fff">${p.name}</span>
+      </div>
+      <button class="pm-x" onclick="closeProductModal()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div style="padding:20px 20px 28px">
+      <div class="prob-grid">
+        <div class="prob-box" style="background:#fef2f2;border:1px solid rgba(220,38,38,.13)"><div class="prob-label" style="color:#dc2626">The Problem</div><div class="prob-text">${p.problem}</div></div>
+        <div class="prob-box" style="background:#f0fdf4;border:1px solid rgba(22,163,74,.13)"><div class="prob-label" style="color:#16a34a">Our Solution</div><div class="prob-text">${p.solution}</div></div>
+      </div>
+      <div class="val-box">
+        <div class="val-lbl">Market Validation</div>
+        <div class="val-nums">
+          <div><div class="val-big">${p.demand}%</div><div class="val-sm">Demand Score</div></div>
+          <div style="text-align:right"><div class="val-big">${realSignups}</div><div class="val-sm">Real Signups So Far</div></div>
+        </div>
+        <div class="bar-track light-bar" style="height:7px"><div class="bar-fill" style="width:${p.demand}%;background:linear-gradient(90deg,${p.g[0]},${p.g[1]})"></div></div>
+      </div>
+      <div style="font-family:Syne,sans-serif;font-size:1.1rem;font-weight:700;color:#0f172a;margin-bottom:12px">Join Early Access</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="field"><label>Name *</label><input class="ibase" id="pm-name" placeholder="Your full name"/></div>
+        <div class="field"><label>Email *</label><input class="ibase" id="pm-email" type="email" placeholder="you@example.com"/></div>
+        <div class="field"><label>Phone</label><input class="ibase" id="pm-phone" type="tel" placeholder="+91 98765 43210"/></div>
+        <div class="field"><label>Budget *</label><select class="ibase" id="pm-budget">${PRICES.map(pr=>`<option>${pr}</option>`).join('')}</select></div>
+        <div class="field"><label>Notes</label><textarea class="ibase" id="pm-note" style="height:66px;resize:none" placeholder="Share any feedback..."></textarea></div>
+        <button class="btn-blue" onclick="submitProduct(${p.id},'${p.name}')">Confirm Early Access</button>
+        <p style="font-size:.68rem;color:#94a3b8;text-align:center">No spam. Just product updates when it launches.</p>
+      </div>
+    </div>`;
+  document.getElementById('modal-product').classList.add('open');
+}
+function closeProductModal() { document.getElementById('modal-product').classList.remove('open'); }
+function submitProduct(productId, name) {
+  // Save real signup to state
+  const s = getState();
+  s.signups.total += 1;
+  s.signups.byProduct[productId] = (s.signups.byProduct[productId]||0) + 1;
+  saveState(s);
+  closeProductModal();
+  document.getElementById('suc-product-txt').textContent = `We'll notify you the moment ${name} launches.`;
+  const so = document.getElementById('suc-product');
+  so.classList.add('open');
+  setTimeout(()=>so.classList.remove('open'),2000);
+  renderProductCards(); // refresh real counts
+}
+
+/* ═══════════════════════════════════════════════════════
+   IDEA MODAL
+══════════════════════════════════════════════════════ */
+let ideas = []; // in-memory + synced to localStorage via state
+function loadIdeas() { ideas = getState().ideas || []; }
+function saveIdeas() { const s=getState(); s.ideas=ideas; saveState(s); }
+
+function openIdeaModal()  { document.getElementById('modal-idea').classList.add('open'); }
+function closeIdeaModal() { document.getElementById('modal-idea').classList.remove('open'); }
+function submitIdea() {
+  const title   = document.getElementById('idea-title').value.trim();
+  const email   = document.getElementById('idea-email').value.trim();
+  const problem = document.getElementById('idea-problem').value.trim();
+  if (!title||!email||!problem) return;
+  const idea = {
+    id: Date.now(),
+    name:     document.getElementById('idea-name').value.trim(),
+    email,
+    title,
+    problem,
+    solution: document.getElementById('idea-solution').value.trim(),
+    category: document.getElementById('idea-cat').value,
+    submittedAt: new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'})
+  };
+  ideas.unshift(idea);
+  saveIdeas();
+  ['idea-name','idea-email','idea-title','idea-solution','idea-problem'].forEach(id=>document.getElementById(id).value='');
+  closeIdeaModal();
+  updateBadge();
+  const so = document.getElementById('suc-idea');
+  so.classList.add('open');
+  setTimeout(()=>so.classList.remove('open'),2200);
+}
+function updateBadge() {
+  const n = ideas.length;
+  ['ideas-badge','mob-bdg'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(n>0){el.textContent=n;el.style.display='flex';}else el.style.display='none';
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN TABS
+══════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-c').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  document.querySelectorAll('.anav,.mob-tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  if(tab==='traffic') setTimeout(renderSessionChart,100);
+  if(tab==='manage')  renderManageList();
+  if(tab==='ideas')   renderIdeas();
+  if(tab==='products') renderProdPerf(getState());
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN CONTENT — all real numbers from state
+══════════════════════════════════════════════════════ */
+let charts = {};
+
+function renderAdminContent() {
+  const s = getState();
+  loadIdeas();
+  updateBadge();
+
+  // Stat cards
+  const visitors = s.visitors || 0;
+  const signups  = s.signups.total || 0;
+  const conv     = visitors > 0 ? ((signups/visitors)*100).toFixed(1) : 0;
+  document.getElementById('stat-visitors').textContent    = visitors.toLocaleString();
+  document.getElementById('stat-signups').textContent     = signups;
+  document.getElementById('stat-conv').textContent        = `${conv}%`;
+  document.getElementById('stat-ideas-count').textContent = ideas.length;
+
+  renderRankList();
+  renderPipelineList(s);
+  renderProdPerf(s);
+  renderCatFilters();
+  renderIdeas();
+  renderVisitorChart(s);
+  renderSessionLog(s);
+  renderManageList();
+
+  const now = new Date().toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('adm-last-updated').textContent = `Last updated: ${now}`;
+}
+
+function renderRankList() {
+  document.getElementById('rank-list').innerHTML = [...PRODUCTS].sort((a,b)=>b.demand-a.demand).map(p=>`
+    <div class="rank-row">
+      <div class="rank-emoji" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.emoji}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:.78rem;font-weight:500;color:#e2e8f0;font-family:'DM Sans',sans-serif">${p.name}</span>
+          <span style="font-family:Syne,sans-serif;font-size:.78rem;font-weight:700;color:#f8fafc">${p.demand}%</span>
+        </div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${p.demand}%;background:linear-gradient(90deg,${p.g[0]},${p.g[1]})"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPipelineList(s) {
+  const el = document.getElementById('pipeline-list');
+  const total = s.signups.total || 0;
+  if (total === 0) {
+    el.innerHTML = '<div style="text-align:center;opacity:.4;padding:20px 0;font-size:.8rem;color:#475569;font-family:DM Sans,sans-serif">No signups yet — share the site to get real data</div>';
+    return;
+  }
+  el.innerHTML = PRODUCTS.map(p=>{
+    const n = s.signups.byProduct[p.id]||0;
+    const pct = total>0 ? (n/total*100).toFixed(0) : 0;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:.75rem;color:#64748b;font-family:'DM Sans',sans-serif">${p.name}</span>
+        <span style="font-family:Syne,sans-serif;font-size:.75rem;font-weight:700;color:#f8fafc">${n}</span>
+      </div>
+      <div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:linear-gradient(90deg,${p.g[0]},${p.g[1]})"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderProdPerf(s) {
+  document.getElementById('prod-perf-list').innerHTML = PRODUCTS.map(p=>{
+    const signups = s.signups.byProduct[p.id]||0;
+    const visitors = s.visitors||0;
+    const conv = visitors>0 ? ((signups/visitors)*100).toFixed(1) : 0;
+    return `<div class="prod-perf-card">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:11px">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,${p.g[0]},${p.g[1]});display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">${p.emoji}</div>
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+          <span style="font-family:Syne,sans-serif;font-size:.92rem;font-weight:700;color:#f8fafc">${p.name}</span>
+          <span style="font-size:9px;font-weight:600;background:#eff6ff;color:#2563eb;padding:2px 7px;border-radius:99px;font-family:'DM Sans',sans-serif">${p.status}</span>
+          <span style="font-size:.7rem;font-weight:700;color:#34d399;font-family:'DM Sans',sans-serif">${p.trend}</span>
+        </div>
+      </div>
+      <div class="ppm-stats">
+        <div class="ppm-box"><div class="ppm-lbl">Visitors</div><div class="ppm-val" style="color:#3b82f6">${visitors.toLocaleString()}</div></div>
+        <div class="ppm-box"><div class="ppm-lbl">Signups</div><div class="ppm-val" style="color:#06b6d4">${signups}</div></div>
+        <div class="ppm-box"><div class="ppm-lbl">Conv. Rate</div><div class="ppm-val" style="color:#10b981">${conv}%</div></div>
+        <div class="ppm-box"><div class="ppm-lbl">Demand</div><div class="ppm-val" style="color:#f59e0b">${p.demand}%</div></div>
+      </div>
+      <div style="height:5px;background:#1e293b;border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${p.demand}%;background:linear-gradient(90deg,${p.g[0]},${p.g[1]});border-radius:99px"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let catFilter = 'All';
+function renderCatFilters() {
+  document.getElementById('cat-filters').innerHTML = CATS.map(c=>
+    `<button class="fbtn${c===catFilter?' on':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+function setCat(c) { catFilter=c; renderCatFilters(); renderIdeas(); }
+
+function renderIdeas() {
+  loadIdeas();
+  const filtered = catFilter==='All' ? ideas : ideas.filter(i=>i.category===catFilter);
+  const n=ideas.length;
+  document.getElementById('ideas-count-text').textContent=`${n} idea${n!==1?'s':''} from the community`;
+  const el=document.getElementById('ideas-list');
+  if(filtered.length===0){
+    el.innerHTML=`<div style="background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:48px;text-align:center"><p style="font-family:Syne,sans-serif;color:#334155;font-weight:600;margin:0 0 4px">No ideas yet</p><p style="font-size:.76rem;color:#475569;font-family:'DM Sans',sans-serif;margin:0">Ideas submitted via the public form appear here.</p></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="ideas-grid">${filtered.map(idea=>`
+    <div class="idea-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:7px">
+        <div>
+          <div style="font-family:Syne,sans-serif;font-size:.88rem;font-weight:700;color:#f8fafc;margin-bottom:2px;line-height:1.3">${idea.title}</div>
+          <div style="font-size:.68rem;color:#475569;font-family:'DM Sans',sans-serif">${idea.name||'Anonymous'} · ${idea.submittedAt}</div>
+        </div>
+        <span style="display:inline-flex;padding:2px 7px;border-radius:99px;font-size:9px;font-weight:700;flex-shrink:0;background:${CAT_CLR[idea.category]||'#6b7280'}20;color:${CAT_CLR[idea.category]||'#6b7280'};font-family:'DM Sans',sans-serif">${idea.category}</span>
+      </div>
+      <div class="idea-sec"><div class="idea-sec-lbl">Problem</div><div class="idea-sec-txt">${idea.problem}</div></div>
+      ${idea.solution?`<div class="idea-sec"><div class="idea-sec-lbl">Solution</div><div class="idea-sec-txt">${idea.solution}</div></div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.68rem;color:#334155;font-family:'DM Sans',sans-serif">${idea.email}</span>
+        <button class="validate-btn"><svg viewBox="0 0 24 24"><path d="M23 6l-9.5 9.5-5-5L1 18M17 6h6v6"/></svg> Validate</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHARTS — real data only
+══════════════════════════════════════════════════════ */
+const CHART_OPTS = {
+  plugins:{ legend:{ labels:{ color:'#475569', font:{ family:'DM Sans' } } }, tooltip:{ backgroundColor:'#0f172a', titleColor:'#e2e8f0', bodyColor:'#94a3b8', borderColor:'#1e293b', borderWidth:1 } },
+  scales:{ x:{ ticks:{ color:'#475569', font:{ family:'DM Sans', size:10 } }, grid:{ color:'#1e293b' } }, y:{ ticks:{ color:'#475569', font:{ family:'DM Sans', size:10 } }, grid:{ color:'#1e293b' }, beginAtZero:true } }
+};
+
+function renderVisitorChart(s) {
+  if(charts.visitors){ charts.visitors.destroy(); delete charts.visitors; }
+  const sessions = s.sessions || [];
+  // Group by hour
+  const groups = {};
+  sessions.forEach(sess=>{
+    const d = new Date(sess.ts);
+    const key = d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' '+d.getHours()+':00';
+    groups[key] = (groups[key]||0)+1;
+  });
+  const labels = Object.keys(groups).slice(-12);
+  const data   = labels.map(k=>groups[k]);
+  const c = document.getElementById('chart-visitors');
+  if(!c) return;
+  charts.visitors = new Chart(c, {
+    type:'line',
+    data:{ labels: labels.length?labels:['No data'], datasets:[{ label:'Visits', data:data.length?data:[0], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.15)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#3b82f6' }] },
+    options:{ ...CHART_OPTS }
+  });
+}
+
+function renderSessionChart() {
+  if(charts.sessions){ charts.sessions.destroy(); delete charts.sessions; }
+  const s = getState();
+  const sessions = s.sessions || [];
+  const groups = {};
+  sessions.forEach(sess=>{
+    const d=new Date(sess.ts);
+    const key=d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    groups[key]=(groups[key]||0)+1;
+  });
+  const labels=Object.keys(groups);
+  const data=labels.map(k=>groups[k]);
+  const c=document.getElementById('chart-sessions');
+  if(!c) return;
+  charts.sessions=new Chart(c,{
+    type:'bar',
+    data:{ labels:labels.length?labels:['No data'], datasets:[{ label:'Sessions', data:data.length?data:[0], backgroundColor:'rgba(59,130,246,.75)', borderRadius:5 }] },
+    options:{ ...CHART_OPTS }
+  });
+}
+
+function renderSessionLog(s) {
+  const sessions=[...(s.sessions||[])].reverse().slice(0,20);
+  const el=document.getElementById('session-log');
+  if(sessions.length===0){
+    el.innerHTML='<div style="padding:20px 18px;font-size:.78rem;color:#334155;font-family:DM Sans,sans-serif;text-align:center">No sessions logged yet</div>';
+    return;
+  }
+  el.innerHTML=sessions.map((sess,i)=>`
+    <div class="t-row" style="${i<sessions.length-1?'':'border-bottom:none'}">
+      <span class="t-date" style="width:auto;flex:1">${sess.time}</span>
+      <span style="font-family:Syne,sans-serif;font-size:.82rem;font-weight:700;color:#34d399">1 visit</span>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   MANAGE PRODUCTS
+══════════════════════════════════════════════════════ */
+let editingProductId = null;
+let deletingProductId = null;
+let selectedGradient = GRADIENTS[0];
+
+function renderManageList() {
+  const el = document.getElementById('manage-prod-list');
+  if (!el) return;
+  if (PRODUCTS.length === 0) {
+    el.innerHTML = `<div style="background:#111827;border:1.5px solid #1e293b;border-radius:16px;padding:52px;text-align:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <p style="font-family:Syne,sans-serif;color:#334155;font-weight:600;margin:0 0 4px">No products yet</p>
+      <p style="font-size:.78rem;color:#1e293b;font-family:'DM Sans',sans-serif;margin:0">Click "Add New Product" to create your first one.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = PRODUCTS.map(p => `
+    <div class="mg-prod-card">
+      <div class="mg-prod-top">
+        <div class="mg-prod-emoji" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${p.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div class="mg-prod-name">${p.name}</div>
+          <div class="mg-prod-desc">${p.desc}</div>
+        </div>
+        <div class="mg-actions">
+          <button class="btn-edit" onclick="openProductForm(${p.id})">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Edit
+          </button>
+          <button class="btn-del" onclick="openDel(${p.id})">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+            Remove
+          </button>
+        </div>
+      </div>
+      <div class="mg-detail-grid">
+        <div class="mg-detail-box">
+          <div class="mg-detail-lbl">The Problem</div>
+          <div class="mg-detail-val">${p.problem}</div>
+        </div>
+        <div class="mg-detail-box">
+          <div class="mg-detail-lbl">Our Solution</div>
+          <div class="mg-detail-val">${p.solution}</div>
+        </div>
+        <div class="mg-detail-box">
+          <div class="mg-detail-lbl">Status</div>
+          <div class="mg-detail-val">${p.status}</div>
+        </div>
+        <div class="mg-detail-box">
+          <div class="mg-detail-lbl">Demand / Trend</div>
+          <div class="mg-detail-val">${p.demand}% &nbsp;·&nbsp; ${p.trend}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderGradientPresets() {
+  const el = document.getElementById('gradient-presets');
+  if (!el) return;
+  el.innerHTML = GRADIENTS.map((g, i) => `
+    <button class="gp${JSON.stringify(g)===JSON.stringify(selectedGradient)?' sel':''}"
+      style="background:linear-gradient(135deg,${g[0]},${g[1]})"
+      onclick="selectGradient(${i})"></button>`).join('');
+}
+
+function selectGradient(i) {
+  selectedGradient = GRADIENTS[i];
+  renderGradientPresets();
+}
+
+function openProductForm(productId) {
+  editingProductId = productId;
+  const el = document.getElementById('pf-modal');
+  const p = productId ? PRODUCTS.find(x => x.id === productId) : null;
+  document.getElementById('pf-modal-title').textContent = p ? 'Edit Product' : 'Add New Product';
+
+  // Fill fields
+  document.getElementById('pf-name').value     = p ? p.name     : '';
+  document.getElementById('pf-emoji').value     = p ? p.emoji    : '';
+  document.getElementById('pf-desc').value      = p ? p.desc     : '';
+  document.getElementById('pf-problem').value   = p ? p.problem  : '';
+  document.getElementById('pf-solution').value  = p ? p.solution : '';
+  document.getElementById('pf-status').value    = p ? p.status   : 'Validation In Progress';
+  document.getElementById('pf-demand').value    = p ? p.demand   : '';
+  document.getElementById('pf-trend').value     = p ? p.trend    : '';
+  document.getElementById('pf-category').value  = p ? (p.category||'Other') : 'Other';
+  selectedGradient = p ? p.g : GRADIENTS[0];
+  renderGradientPresets();
+  el.classList.add('open');
+}
+
+function closeProductForm() {
+  document.getElementById('pf-modal').classList.remove('open');
+  editingProductId = null;
+}
+
+function saveProduct() {
+  const name     = document.getElementById('pf-name').value.trim();
+  const emoji    = document.getElementById('pf-emoji').value.trim() || '📦';
+  const desc     = document.getElementById('pf-desc').value.trim();
+  const problem  = document.getElementById('pf-problem').value.trim();
+  const solution = document.getElementById('pf-solution').value.trim();
+  const status   = document.getElementById('pf-status').value;
+  const demand   = parseInt(document.getElementById('pf-demand').value) || 50;
+  const trend    = document.getElementById('pf-trend').value.trim() || '+0%';
+  const category = document.getElementById('pf-category').value;
+
+  if (!name || !desc || !problem || !solution) {
+    alert('Please fill in all required fields (Name, Description, Problem, Solution).');
+    return;
+  }
+
+  if (editingProductId) {
+    // Update existing
+    const idx = PRODUCTS.findIndex(p => p.id === editingProductId);
+    if (idx !== -1) {
+      PRODUCTS[idx] = { ...PRODUCTS[idx], name, emoji, desc, problem, solution, status, demand, trend, category, g: selectedGradient };
+    }
+  } else {
+    // Add new
+    const newId = Date.now();
+    PRODUCTS.push({ id: newId, name, emoji, desc, problem, solution, status, demand, trend, category, g: selectedGradient });
+    // Also add signup tracking slot
+    const s = getState();
+    s.signups.byProduct[newId] = 0;
+    saveState(s);
+  }
+
+  saveProducts();
+  closeProductForm();
+  renderManageList();
+  renderProductCards();   // update public site
+  startFC();              // refresh flashcards
+  // Refresh admin charts if visible
+  renderRankList();
+  renderPipelineList(getState());
+  renderProdPerf(getState());
+}
+
+function openDel(productId) {
+  deletingProductId = productId;
+  const p = PRODUCTS.find(x => x.id === productId);
+  document.getElementById('cdel-msg').textContent = `"${p ? p.name : 'this product'}" will be removed from the public site permanently.`;
+  document.getElementById('cdel-modal').classList.add('open');
+}
+
+function closeDel() {
+  document.getElementById('cdel-modal').classList.remove('open');
+  deletingProductId = null;
+}
+
+function confirmDelete() {
+  if (!deletingProductId) return;
+  PRODUCTS = PRODUCTS.filter(p => p.id !== deletingProductId);
+  saveProducts();
+  closeDel();
+  renderManageList();
+  renderProductCards();
+  startFC();
+  renderRankList();
+  renderPipelineList(getState());
+  renderProdPerf(getState());
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+loadIdeas();
+updateBadge();
+loadProducts();
+startFC();
+renderProductCards();
+</script>
+</body>
+</html>
